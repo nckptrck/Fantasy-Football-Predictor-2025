@@ -9,7 +9,7 @@ This project predicts the **number of fantasy football points** (Full PPR scorin
 
 2. **Feature Engineering**  
    - Created predictive features from raw stats, player performance history, and opponent matchups.  
-   - Included rolling averages, team-level statistics, as vegas lines and implied point totals.
+   - Included rolling averages, team-level statistics, vegas lines and implied point totals.
    - Created a final training set containing 23,414 rows and 128 columns
      - Each row contains a player for a particular week and season (2020-2024) and their recent individual, team, and opponent statististics
      - Target column is their Full-PPR fantasy football points for that week
@@ -52,4 +52,5 @@ This project predicts the **number of fantasy football points** (Full PPR scorin
 - run `create-training-data.py` to generate full training data
 - run `model-selection.ipynb` to see cross-validation model comparison
 - ...
+
 
