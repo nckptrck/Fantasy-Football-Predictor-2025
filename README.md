@@ -1,6 +1,6 @@
 # Project Overview
 
-This project predicts the **number of fantasy football points** (Full PPR scoring) a player will score in a given week. Using historical data from the [`nflverse`](https://nflverse.nflverse.com/) dataset combined with custom-engineered features, multiple machine learning models were tested to find the most accurate predictive approach.
+The goal of this project is to predict the **number of fantasy football points** (Full PPR scoring) a player will score in a given week. Using historical data from the [`nflverse`](https://nflverse.nflverse.com/) dataset combined with custom-engineered features, multiple machine learning models were tested to find the most accurate predictive model.
 
 ## Workflow
 1. **Data Collection**  
@@ -52,6 +52,7 @@ This project predicts the **number of fantasy football points** (Full PPR scorin
 - run `create-training-data.py` to generate full training data
 - run `model-selection.ipynb` to see cross-validation model comparison
 - ...
+
 
 
 
