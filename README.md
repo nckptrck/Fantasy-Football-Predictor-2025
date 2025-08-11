@@ -27,7 +27,7 @@ This project predicts the **number of fantasy football points** (Full PPR scorin
    - Evaluation using **Root Mean Squared Error (RMSE)** as the main performance metric.
 
 4. **Model Evaluation (planned)**
-   - Trained model on 2020-2023 data, evaluate across full 2024 season
+   - Train model on 2020-2023 data, evaluate across full 2024 season
    - Evaluation of RMSE
      - Overall
      - Breakdown by Position (QB, WR, RB, TE)
@@ -52,5 +52,6 @@ This project predicts the **number of fantasy football points** (Full PPR scorin
 - run `create-training-data.py` to generate full training data
 - run `model-selection.ipynb` to see cross-validation model comparison
 - ...
+
 
 
