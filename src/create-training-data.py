@@ -361,7 +361,8 @@ def get_row(player_name:str,season:int,week:int, for_prediction:bool = True):
 # Function: get_training_data()
 # input: player names, seasons, weeks
 # output: full training data 
-# calls get_row for every skill player & qb from wk1 2022 - wk17 2024
+# calls get_row for every
+#  skill player & qb from wk1 2022 - wk17 2024
 
 def get_training_data():
     rows = []
@@ -380,4 +381,5 @@ def get_training_data():
 # build training set and export to csv
 # will take a few minutes to run!!!
 # training_data = get_training_data()
+
 # training_data.to_csv('data/training.csv')
