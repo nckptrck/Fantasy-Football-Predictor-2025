@@ -9,7 +9,7 @@ import pandas as pd
 import streamlit as st
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parent
 PRODUCTION_PATH = PROJECT_ROOT / "outputs" / "production_predictions_2026.csv"
 COMBINED_PATH = PROJECT_ROOT / "outputs" / "temporal_validation_combined.csv"
 RAW_PATH = PROJECT_ROOT / "outputs" / "temporal_validation.csv"
