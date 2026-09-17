@@ -8,8 +8,8 @@ seaborn
 joblib
 xgboost
 shap
-streamlit>=1.41,<1.42
-altair>=5,<6
+streamlit==1.41.1
+altair==5.4.1
 tqdm
 pyyaml
 tensorflow==2.15.1; python_version < "3.14"
