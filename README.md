@@ -137,6 +137,11 @@ file-backed performance artifact used by the dashboard:
   --output outputs/performance_2026_week_1.json
 ```
 
+Run this at the end of every completed week. It writes both the weekly
+performance JSON and the matching compact predictions file:
+`outputs/predictions_with_actuals_2026_week_1.csv`. For week 2, use
+`--week 2`, the week 2 forecast CSV, and `performance_2026_week_2.json`.
+
 For the season-long artifact, omit `--week` and use
 `outputs/performance_2026.json`. The week-specific artifact contains only that
 week's scored rows; the season artifact contains the full scored season.

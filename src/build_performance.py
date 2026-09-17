@@ -159,7 +159,10 @@ def main() -> None:
     artifact = build_performance(args.predictions, args.data_dir, args.season, args.week)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(artifact, indent=2))
-    updated_predictions = args.updated_predictions or output.with_name(f"predictions_with_actuals_{args.season}.csv")
+    updated_predictions = args.updated_predictions or output.with_name(
+        f"predictions_with_actuals_{args.season}"
+        f"_week_{args.week}.csv" if args.week is not None else f"predictions_with_actuals_{args.season}.csv"
+    )
     merge_actuals(args.predictions, args.data_dir, args.season).to_csv(updated_predictions, index=False)
     print(f"Saved performance artifact to {output}")
     print(f"Saved predictions with actuals to {updated_predictions}")

@@ -113,18 +113,36 @@ def load_predictions(path: Path) -> tuple[pd.DataFrame, str]:
 	predictions = predictions.drop_duplicates(["player_name", "target_season", "target_week"], keep="last")
 	if "y_true" in predictions.columns:
 		predictions["y_true"] = pd.to_numeric(predictions["y_true"], errors="coerce")
-	actuals_path = PROJECT_ROOT / "data" / "weekly.csv"
-	if actuals_path.exists():
-		weekly = pd.read_csv(actuals_path, usecols=["player_display_name", "season", "week", "fantasy_points_ppr"], low_memory=False)
-		actuals = weekly.rename(
-			columns={
-				"player_display_name": "player_name",
-				"season": "target_season",
-				"week": "target_week",
-				"fantasy_points_ppr": "actual_latest",
-			}
+	actuals_paths = sorted((PROJECT_ROOT / "outputs").glob(f"predictions_with_actuals_{season}*.csv"))
+	if actuals_paths:
+		actuals = pd.concat(
+			[
+				pd.read_csv(
+					path,
+					usecols=["player_name", "target_season", "target_week", "y_true"],
+					low_memory=False,
+				).rename(columns={"y_true": "actual_latest"})
+				for path in actuals_paths
+			],
+			ignore_index=True,
 		)
-		actuals = actuals.groupby(["player_name", "target_season", "target_week"], as_index=False)["actual_latest"].sum()
+		actuals = actuals.drop_duplicates(["player_name", "target_season", "target_week"], keep="last")
+	else:
+		actuals_path = PROJECT_ROOT / "data" / "weekly.csv"
+		if not actuals_path.exists():
+			actuals = None
+		else:
+			weekly = pd.read_csv(actuals_path, usecols=["player_display_name", "season", "week", "fantasy_points_ppr"], low_memory=False)
+			actuals = weekly.rename(
+				columns={
+					"player_display_name": "player_name",
+					"season": "target_season",
+					"week": "target_week",
+					"fantasy_points_ppr": "actual_latest",
+				}
+			)
+			actuals = actuals.groupby(["player_name", "target_season", "target_week"], as_index=False)["actual_latest"].sum()
+	if actuals is not None:
 		predictions = predictions.drop(columns=["y_true"], errors="ignore").merge(
 			actuals,
 			on=["player_name", "target_season", "target_week"],
