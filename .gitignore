@@ -1,6 +1,7 @@
-data/*
-!data/
+data/
 venv/
+.venv/
+.vscode/
 .DS_Store
 .zshrc
 __pycache__/
@@ -9,5 +10,4 @@ outputs/*
 !outputs/production_predictions_*.csv
 !outputs/predictions_with_actuals_*.csv
 !outputs/performance_*.json
-!outputs/temporal_validation.csv
-!outputs/temporal_validation_combined.csv
+!outputs/temporal_validation_best_config.yaml

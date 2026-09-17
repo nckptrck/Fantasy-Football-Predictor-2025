@@ -1,0 +1,194 @@
+experiment:
+  name: lstm_v1_wr_rb
+  positions: [WR, RB]
+  random_seed: 42
+
+data:
+  data_dir: data
+  start_season: 2019
+  end_season: null
+  regular_season_weeks: [1, 17]
+  lookback: 17
+  look_forward: 17
+  allow_cross_season_targets: true
+  target: fantasy_points_ppr
+  missing_value: 0.0
+  rolling_windows: [3, 5, 8]
+  rolling_aggregation: mean
+  sequence_alignment: calendar_week
+  missing_player_game: zero_with_played_mask
+
+  # Each timestep contains only information available before that week's game.
+  # Source values are single-game observations. Rolling features will be
+  # constructed from prior timesteps by the tensor builder.
+  input_groups:
+    player:
+      source: weekly
+      aggregation: per_game
+      columns:
+        # Individual passing fields are disabled for the RB/WR model.
+        # - completions
+        # - attempts
+        # - passing_yards
+        # - passing_tds
+        # - interceptions
+        # - sacks
+        # - sack_yards
+        # - sack_fumbles
+        # - sack_fumbles_lost
+        # - passing_air_yards
+        # - passing_yards_after_catch
+        # - passing_first_downs
+        # - passing_epa
+        # - passing_2pt_conversions
+        # - pacr
+        # - dakota
+        - carries
+        - rushing_yards
+        - rushing_tds
+        - rushing_fumbles
+        - rushing_fumbles_lost
+        - rushing_first_downs
+        - rushing_epa
+        - rushing_2pt_conversions
+        - receptions
+        - targets
+        - receiving_yards
+        - receiving_tds
+        - receiving_fumbles
+        - receiving_fumbles_lost
+        - receiving_air_yards
+        - receiving_yards_after_catch
+        - receiving_first_downs
+        - receiving_epa
+        - receiving_2pt_conversions
+        - racr
+        - target_share
+        - air_yards_share
+        - wopr
+        - special_teams_tds
+        - fantasy_points
+        - fantasy_points_ppr
+        - fumbles
+        - fumbles_lost
+        - first_downs
+    team_offense:
+      source: team_weekly_stats
+      aggregation: per_game
+      # Team passing volume remains active as WR opportunity and game-context
+      # information, even though individual passing fields are excluded.
+      columns:
+        - team_passing_yards
+        - team_rushing_yards
+        - team_passing_tds
+        - team_rushing_tds
+        - team_total_plays
+        - team_first_downs
+        - team_yards_per_play
+        - team_turnovers
+    opponent_defense:
+      source: team_weekly_stats
+      aggregation: per_game
+      # These are the opponent's per-game offensive results against its defense.
+      columns:
+        - team_passing_yards
+        - team_rushing_yards
+        - team_passing_tds
+        - team_rushing_tds
+        - team_total_plays
+        - team_first_downs
+        - team_yards_per_play
+        - team_turnovers
+
+  categorical_features:
+    - position
+    - team
+    - opponent_team
+
+  excluded_from_inputs:
+    - season
+    - week
+    - player_id
+    - player_name
+    - player_display_name
+    - headshot_url
+    - target
+
+model:
+  architecture: seq2seq_lstm
+  encoder_hidden_sizes: [128, 128]
+  decoder_hidden_sizes: [128]
+  categorical_embedding_dims:
+    position: 4
+    team: 8
+    opponent_team: 8
+  decoder_horizon_embedding_dim: 16
+  dropout: 0.2
+  bidirectional: false
+  use_played_mask: true
+  output_activation: identity
+
+training:
+  batch_size: 64
+  epochs: 100
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  optimizer: AdamW
+  loss: huber
+  early_stopping_patience: 15
+
+evaluation:
+  strategy: temporal_season
+  validation_seasons: [2024, 2025]
+
+tuning:
+  method: bayesian_optimization
+  objective: validation_rmse
+  max_trials: 10
+  num_initial_points: 3
+  verbose: true
+
+search_space:
+  model.architecture:
+    type: choices
+    values: [seq2seq_lstm]
+  model.encoder_hidden_sizes:
+    type: choices
+    values: [[32, 32], [64, 64], [96, 96], [128, 128], [128, 64], [192, 128], [256, 256]]
+  model.decoder_hidden_sizes:
+    type: choices
+    values: [[32], [64], [96], [128], [192], [256]]
+  model.dropout:
+    type: float
+    start: 0.0
+    stop: 0.5
+    step: 0.05
+  model.encoder_dropout:
+    type: float
+    start: 0.0
+    stop: 0.5
+    step: 0.05
+  model.decoder_dropout:
+    type: float
+    start: 0.0
+    stop: 0.5
+    step: 0.05
+  model.decoder_horizon_embedding_dim:
+    type: int
+    start: 8
+    stop: 96
+    step: 8
+  model.bidirectional:
+    type: choices
+    values: [false, true]
+  training.batch_size:
+    type: choices
+    values: [16, 32, 64, 128, 256]
+  training.learning_rate:
+    type: float
+    start: 0.00025
+    stop: 0.004
+    step: 0.00025
+  training.loss:
+    type: choices
+    values: [huber, mse, mae]
