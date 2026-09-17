@@ -2,3 +2,6 @@ data/
 venv/
 .DS_Store
 .zshrc
+__pycache__/
+outptuts/
+tes
