@@ -1,6 +1,5 @@
 pandas
-numpy>=1.26,<2.0; python_version < "3.14"
-numpy>=2.0; python_version >= "3.14"
+numpy>=1.26,<2.0
 scikit-learn
 nfl_data_py
 matplotlib
@@ -9,8 +8,8 @@ joblib
 xgboost
 shap
 streamlit==1.41.1
-altair==5.4.1
+altair==5.3.0
 tqdm
 pyyaml
-tensorflow==2.15.1; python_version < "3.14"
+tensorflow==2.15.1
 keras-tuner
