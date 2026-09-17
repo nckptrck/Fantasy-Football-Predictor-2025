@@ -1,5 +1,6 @@
 pandas
-numpy>=1.26,<2.0
+numpy>=1.26,<2.0; python_version < "3.14"
+numpy>=2.0; python_version >= "3.14"
 scikit-learn
 nfl_data_py
 matplotlib
@@ -10,5 +11,5 @@ shap
 streamlit<1.42
 tqdm
 pyyaml
-tensorflow==2.15.1
+tensorflow==2.15.1; python_version < "3.14"
 keras-tuner
