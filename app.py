@@ -449,8 +449,9 @@ else:
 	st.caption(f"{recommendation}. Confidence uses projection share because this file has no usable 95% bounds.")
 
 st.markdown('<div class="section-rule"></div>', unsafe_allow_html=True)
-left, right = st.columns([1.3, 1], gap="large")
-with left:
+snapshots_container = st.container()
+board_container = st.container()
+with board_container:
 	st.subheader("Week ranking")
 	board_columns = ["player_name", "projection_rounded", "current_average", "actual_current_average", "ros_total", "ros_average"]
 	if {"projection_low", "projection_high"}.issubset(week_data.columns):
@@ -484,7 +485,7 @@ with left:
 		height=500,
 	)
 
-with right:
+with snapshots_container:
 	st.subheader("Player snapshots")
 	for player_name in [player_a, player_b]:
 		player_data = season_data[season_data["player_name"] == player_name].sort_values("target_week")
