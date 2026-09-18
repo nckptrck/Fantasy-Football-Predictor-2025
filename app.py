@@ -258,11 +258,64 @@ def probability_a_over_b(player_a_row: pd.Series, player_b_row: pd.Series) -> tu
 	return (a_projection / projection_total if projection_total > 0 else 0.5), False
 
 
+def render_rankings(week_data: pd.DataFrame, selected_week: int) -> None:
+	st.markdown('<div class="eyebrow">Rankings / weekly board</div>', unsafe_allow_html=True)
+	st.title(f"Week {selected_week} Rankings")
+	st.markdown('<div class="lede">Filter the active player pool by position and sort the full projection table by any displayed metric.</div>', unsafe_allow_html=True)
+	if "position" not in week_data.columns or week_data["position"].eq("UNKNOWN").all():
+		st.warning("Position data is not present in this forecast file. Regenerate forecasts after updating the pipeline to enable RB/WR filtering.")
+		position_options = ["All"]
+	else:
+		position_options = ["All"] + [position for position in ["RB", "WR"] if position in set(week_data["position"].dropna().astype(str))]
+	filter_col, sort_col, direction_col = st.columns([1, 1.5, 1])
+	with filter_col:
+		selected_position = st.selectbox("Position", position_options, key="rankings_position")
+	filtered = week_data if selected_position == "All" else week_data[week_data["position"].eq(selected_position)]
+	board_columns = ["player_name"]
+	if "position" in filtered.columns:
+		board_columns.append("position")
+	board_columns += ["projection_rounded", "current_average", "actual_current_average", "ros_total", "ros_average"]
+	if {"projection_low", "projection_high"}.issubset(filtered.columns):
+		board_columns.insert(2 if "position" in filtered.columns else 1, "projection_low")
+		board_columns.insert(3 if "position" in filtered.columns else 2, "projection_high")
+	board = filtered[board_columns].rename(
+		columns={
+			"player_name": "Player", "position": "Position", "projection_rounded": "This week",
+			"projection_low": "95% low", "projection_high": "95% high", "current_average": "Current avg",
+			"actual_current_average": "Actual avg", "ros_total": "ROS total", "ros_average": "ROS / game",
+		}
+	)
+	sort_options = [column for column in board.columns if column not in {"Player", "Position"}]
+	with sort_col:
+		selected_sort = st.selectbox("Sort by", sort_options, key="rankings_sort")
+	with direction_col:
+		ascending = st.toggle("Ascending", value=False, key="rankings_ascending")
+	board = board.sort_values(selected_sort, ascending=ascending, na_position="last").reset_index(drop=True)
+	board.index = board.index + 1
+	format_columns = {column: "%.2f" for column in sort_options}
+	st.dataframe(
+		board.style.format(format_columns),
+		column_config={
+			"Player": st.column_config.TextColumn("Player", help="Player name."),
+			"Position": st.column_config.TextColumn("Position", help="Roster position."),
+			"This week": st.column_config.NumberColumn("This week", format="%.2f", help="Projected fantasy points for the selected week."),
+			"95% low": st.column_config.NumberColumn("95% low", format="%.2f", help="Lower bound of the 95% projection interval."),
+			"95% high": st.column_config.NumberColumn("95% high", format="%.2f", help="Upper bound of the 95% projection interval."),
+			"Current avg": st.column_config.NumberColumn("Current avg", format="%.2f", help="Average projected points across completed weeks."),
+			"Actual avg": st.column_config.NumberColumn("Actual avg", format="%.2f", help="Average actual points across completed weeks."),
+			"ROS total": st.column_config.NumberColumn("ROS total", format="%.2f", help="Projected points from this week through week 17."),
+			"ROS / game": st.column_config.NumberColumn("ROS / game", format="%.2f", help="Projected ROS total divided by remaining games."),
+		},
+		use_container_width=True,
+		height=650,
+	)
+
+
 st.markdown('<div class="eyebrow">Sunday Signal / fantasy football intelligence</div>', unsafe_allow_html=True)
 st.title("Sunday Signal")
-selected_view = st.radio("Choose a workspace", ["Predictions", "Performance"], horizontal=True)
+selected_view = st.radio("Choose a page", ["Rankings", "Start / Sit", "Model Performance"], horizontal=True)
 
-if selected_view == "Performance":
+if selected_view == "Model Performance":
 	performance_paths = available_performance_paths()
 	if not performance_paths:
 		st.info("No performance artifact found. Run src/build_performance.py first.")
@@ -345,6 +398,10 @@ player_summary["ros_total"] = player_summary["ros_total"].fillna(0.0)
 player_summary["ros_games"] = player_summary["ros_games"].fillna(0).astype(int)
 player_summary["ros_average"] = player_summary["ros_average"].fillna(0.0)
 week_data = week_data.merge(player_summary[["player_name", "current_average", "actual_current_average", "ros_total", "ros_average"]], on="player_name", how="left")
+if selected_view == "Rankings":
+	render_rankings(week_data, int(selected_week))
+	st.markdown(f'<div class="source-note">SOURCE: {source_name} · TARGET SEASON: {selected_season} · ACTIVE ROSTER FORECAST</div>', unsafe_allow_html=True)
+	st.stop()
 plot_values = season_data[["y_pred"]].copy()
 if {"projection_low", "projection_high"}.issubset(season_data.columns):
 	plot_values = season_data[["y_pred", "projection_low", "projection_high"]]

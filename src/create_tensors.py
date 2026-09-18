@@ -277,6 +277,7 @@ def create_tensors(
             target_masks.append(target_frame["target_played"].to_numpy(dtype=np.float32))
             metadata.append({
                 "player_name": name,
+                "position": str(input_frame.iloc[-1].get("position", "UNKNOWN")),
                 "origin_season": int(input_frame.iloc[-1]["season"]),
                 "origin_week": int(input_frame.iloc[-1]["week"]),
                 "target_seasons": target_frame["season"].astype(int).tolist(),

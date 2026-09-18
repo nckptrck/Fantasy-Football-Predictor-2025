@@ -100,6 +100,7 @@ def prediction_table(
         for step, (season, week) in enumerate(zip(target_seasons, target_weeks), start=1):
             rows.append({
                 "player_name": sample["player_name"],
+                "position": sample.get("position", "UNKNOWN"),
                 "origin_season": sample["origin_season"],
                 "origin_week": sample["origin_week"],
                 "target_season": season,
